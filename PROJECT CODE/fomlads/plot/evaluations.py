@@ -36,7 +36,7 @@ def plot_train_test_errors(
 
 def plot_roc(
         false_positive_rates, true_positive_rates, linewidth=3, fig_ax=None,
-        colour=None, ofname=None):
+        colour=None, ofname=None, **kwargs):
     if fig_ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
@@ -46,7 +46,7 @@ def plot_roc(
         colour='r'
     ax.plot(
         false_positive_rates, true_positive_rates, '-', linewidth=linewidth,
-        color=colour)
+        color=colour, **kwargs)
     ax.set_xlabel("False Positive Rate")
     ax.set_ylabel("True Positive Rate")
     ax.set_aspect('equal', 'box')

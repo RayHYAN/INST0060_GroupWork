@@ -86,3 +86,4 @@ def expand_to_monomials(inputs, degree):
     for i in range(degree+1):
         expanded_inputs.append(inputs**i)
     return np.array(expanded_inputs).transpose()
+
