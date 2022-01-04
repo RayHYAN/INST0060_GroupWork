@@ -62,6 +62,7 @@ def main():
     W_validation_inputs,W_validation_targets,W_test_inputs,W_test_targets = dframe_train_test_input_target(FM_WHITE,0.2)#W stands for white
 
     R_validation_inputs,R_validation_targets,R_test_inputs,R_test_targets = dframe_train_test_input_target(FM_RED,0.2) #R stands for Red
+    
     #SVM
     
     #Random Forest
@@ -72,9 +73,10 @@ def main():
     scalar_funct(W_test_inputs)
     scalar_funct(R_validation_inputs)
     scalar_funct(R_test_inputs)
-
-    LR_lambda_cv(W_validation_inputs,W_validation_targets,W_test_inputs,W_test_targets,wine_type='white wine',lambda_list = np.logspace(-3,-1,10))
-    LR_lambda_cv(R_validation_inputs,R_validation_targets,R_test_inputs,R_test_targets,wine_type='red wine',lambda_list = np.logspace(-3,-1,10))
+    
+    
+    LR_lambda_cv(W_validation_inputs,W_validation_targets,W_test_inputs,W_test_targets,wine_type='white wine',lambda_list = np.logspace(-4,-1,10))
+    LR_lambda_cv(R_validation_inputs,R_validation_targets,R_test_inputs,R_test_targets,wine_type='red wine',lambda_list = np.logspace(-4,-1,10))
 
 
 # In[7]:

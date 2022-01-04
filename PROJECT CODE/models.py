@@ -14,6 +14,7 @@ from fomlads.model.classification import logistic_regression_predict
 from processing import accuracy_score
 from evaluation import classificationreport
 from evaluation import confusion_matrix
+from time import process_time
 
 
 # In[3]:
@@ -73,7 +74,7 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     
     """
     accuracy_list = []
-    
+    print("Testing lambda parameter on validation data consisting of 5 folds")
     for lam in lambda_list:
 
         val_acc,var_cv=evaluate_cv_LR(training_validation_inputs,training_validation_targets,lamda=lam)
@@ -89,11 +90,11 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     plt.xlabel('Lambda')
     plt.xscale("log")
     plt.ylabel('Accuracy')
-    plt.title("Logistic regression accuracies on values of lambda on validation data")
+    plt.title("Average Logistic regression accuracies on values of lambda on validation data")
     plt.savefig('foo.png', bbox_inches='tight')
     plt.legend()
     print(f'Best parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
-    print(f'Best accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
+    print(f'Best average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
     print('\nNow running logistic regression on test data with best parameters ...')
     
     LR_test_funct(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type=wine_type,lamda = lam_max)
@@ -105,10 +106,15 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
 
 def LR_test_funct(train_val_inputs,train_val_targets,test_inputs,test_targets, wine_type,lamda = 0):
     
+    t1_start = process_time()
+
     weight = logistic_regression_fit(train_val_inputs,train_val_targets,lamda = lamda)
     predicted_wine_targets = logistic_regression_predict(test_inputs,weight)
     accuracy = accuracy_score(predicted_wine_targets,test_targets)
     
+    t1_stop = process_time()
+    
+    print("Time taken for model to run on test data in seconds: ",t1_stop-t1_start)
     print(f"\n Classification Report for {wine_type} on test data \n\n")
     classificationreport(test_targets, predicted_wine_targets)
     print(f'\n Confusion matrix for {wine_type} on test data \n\n' + str(confusion_matrix(test_targets,predicted_wine_targets)))
