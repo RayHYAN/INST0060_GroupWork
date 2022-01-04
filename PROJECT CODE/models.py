@@ -91,8 +91,9 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     plt.xscale("log")
     plt.ylabel('Accuracy')
     plt.title("Average Logistic regression accuracies on values of lambda on validation data")
-    plt.savefig('foo.png', bbox_inches='tight')
     plt.legend()
+    plt.savefig('Lambda_fitting_on_cross_validation_logistic_regression.png', bbox_inches='tight')
+    
     print(f'Best parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
     print(f'Best average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
     print('\nNow running logistic regression on test data with best parameters ...')
