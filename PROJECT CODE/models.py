@@ -43,7 +43,7 @@ def cross_validation_LR(X, y, cv,lamda=0):
         y_train = np.hstack(y_train_temp)
         weights = logistic_regression_fit(X_train, y_train,lamda=lamda)
         y_predict = logistic_regression_predict(X_test,weights)
-        val_acc = accuracy_score(y_test, y_predict)
+        val_acc = accuracy_score(y_test,y_predict)
         cross_vals.append(val_acc)
     return cross_vals
 
@@ -74,7 +74,7 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     
     """
     accuracy_list = []
-    print("Testing lambda parameter on validation data consisting of 5 folds")
+    print(f"Testing lambda parameter on validation data for {wine_type} consisting of 5 folds")
     for lam in lambda_list:
 
         val_acc,var_cv=evaluate_cv_LR(training_validation_inputs,training_validation_targets,lamda=lam)
@@ -94,8 +94,8 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     plt.legend()
     plt.savefig('Lambda_fitting_on_cross_validation_logistic_regression.png', bbox_inches='tight')
     
-    print(f'Best parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
-    print(f'Best average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
+    print(f'\nBest parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
+    print(f'\nBest average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
     print('\nNow running logistic regression on test data with best parameters ...')
     
     LR_test_funct(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type=wine_type,lamda = lam_max)
@@ -111,7 +111,6 @@ def LR_test_funct(train_val_inputs,train_val_targets,test_inputs,test_targets, w
 
     weight = logistic_regression_fit(train_val_inputs,train_val_targets,lamda = lamda)
     predicted_wine_targets = logistic_regression_predict(test_inputs,weight)
-    accuracy = accuracy_score(predicted_wine_targets,test_targets)
     
     t1_stop = process_time()
     
