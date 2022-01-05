@@ -102,14 +102,8 @@ def feature_mapping(dframe):
 # In[8]:
 
 
-def accuracy_score(pred_targets,real_targets):
-    number_of_targets = len(real_targets)
-    score = 0
-    
-    for i in range(number_of_targets):
-        if real_targets[i]==pred_targets[i]:
-            score += 1
-    accuracy = score/number_of_targets
+def accuracy_score(predicted_classes,true_classes):
+    accuracy = np.sum(np.equal(true_classes, predicted_classes)) / len(true_classes)
     return accuracy
 
 
