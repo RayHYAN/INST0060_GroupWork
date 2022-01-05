@@ -3,6 +3,7 @@ import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 
+
 from fomlads.data.function import logistic_sigmoid
 from fomlads.model.density_estimation import max_lik_mv_gaussian
 
@@ -154,7 +155,7 @@ def shared_covariance_model_predict(inputs, pi, mean0, mean1, covmtx):
 
 def logistic_regression_fit(
         inputs, targets, weights0=None, termination_threshold=1e-8,
-        add_bias_term=True):
+        add_bias_term=True,lamda=0):
     """
     Fits a set of weights to the logistic regression model using the iteratively
     reweighted least squares (IRLS) method (Rubin, 1983)
@@ -183,6 +184,7 @@ def logistic_regression_fit(
         D += 1
     targets = targets.reshape((N,1))
     # initialise the weights
+    
     if weights0 is None:
         weights = np.random.multivariate_normal(np.zeros(D), 0.0001*np.identity(D))
     else:
@@ -191,6 +193,7 @@ def logistic_regression_fit(
     # initially the update magnitude is set as larger than the
     # termination_threshold to ensure the first iteration runs
     update_magnitude = 2*termination_threshold
+    count = 0
     while update_magnitude > termination_threshold:
         # calculate the current prediction vector for weights
         # we don't want to extend the inputs a second time so add_bias_term
@@ -204,7 +207,8 @@ def logistic_regression_fit(
         # Calculate the Hessian inverse
         H_inv = np.linalg.inv(inputs.T @ R @ inputs)
         # update the weights
-        new_weights = weights - H_inv @ inputs.T @ (predicts-targets)
+        # I have added a new regularisation term within the new weights, using L1 regularisation
+        new_weights = weights - H_inv @ inputs.T @ (predicts-targets) + (lamda/2)*np.sum(np.abs(weights))
         # calculate the update_magnitude
         update_magnitude = np.sqrt(np.sum((new_weights-weights)**2))
         # update the weights
@@ -255,3 +259,5 @@ def construct_logistic_regression_prediction_function(weights, **kwargs):
     def prediction_function(inputs):
         return logistic_regression_predict(inputs, weights, **kwargs)
     return prediction_function
+
+
