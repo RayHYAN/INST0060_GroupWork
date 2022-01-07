@@ -20,7 +20,7 @@ from fomlads.evaluate.eval_regression import train_and_test_filter
 # In[5]:
 
 
-def processing(file, sample_size, group, test_frac=0.2, state=42):
+def processing(file, sample_size, group, test_frac=0.2, state=42, standardized=True):
     df = pd.read_csv(file)
 
     #Drop any empty values
@@ -34,10 +34,13 @@ def processing(file, sample_size, group, test_frac=0.2, state=42):
     print("Deriving the representation...")    
     concat = derived_rep(DF, sample_size, state)
     print("feature mapping...")
-    new_feature_mapping(concat)
+    #concat = new_feature_mapping(concat)
+    concat = feature_mapping(concat)
+    #print(concat.columns)
     X, y = get_dataset(concat)
     print("standardizing...")
-    X = scalar_funct(X)
+    if standardized:
+        X = scalar_funct(X)
 
     print("splitting the dataset...")
     X_train, y_train, X_test, y_test = train_test_split(X, y, test_frac, state=42)
@@ -107,19 +110,20 @@ def feature_mapping(dframe):
     
     return fm_dframe
 
-def new_feature_mapping(dframe):
-    dframe["Target"] = dframe.apply(lambda x: 1 if x['quality_1'] - x['quality_2'] > 0 else 0, axis=1)
-    dframe = frame.drop(columns=['quality_1']) if 'quality_1' in frame.columns else frame
-    dframe = frame.drop(columns=['quality_2']) if 'quality_2' in frame.columns else frame
-    return dframe
+def new_feature_mapping(frame):
+    frame["Target"] = frame.apply(lambda x: 1 if x['quality_1'] - x['quality_2'] > 0 else 0, axis=1)
+    frame = frame.drop(columns=['quality_diff']) if 'quality_diff' in frame.columns else frame #Dropping the quality difference column
+    frame = frame.drop(columns=['quality_1']) if 'quality_1' in frame.columns else frame
+    frame = frame.drop(columns=['quality_2']) if 'quality_2' in frame.columns else frame
+    print(frame.columns)
+    return frame
 
 def get_dataset(frame):
-    dffeature = frame.drop(columns=['quality_diff']) if 'quality_diff' in frame.columns else frame #Dropping the quality difference column
     
-    np.random.seed(42) #Setting a consistent seed 
-    featurematrix = dffeature.to_numpy() #Converting the dataframe into a numpy array 
+
+    featurematrix = frame.to_numpy() #Converting the dataframe into a numpy array 
     
-    columns = len(list(dffeature.columns))
+    columns = len(list(frame.columns))
     
     X = featurematrix[:,:(columns-1)] #We split the matrix into inputs 
     y = featurematrix[:,columns-1] #Take the last column of the matrix as targets 
