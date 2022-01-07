@@ -109,6 +109,8 @@ def feature_mapping(dframe):
 
 def new_feature_mapping(dframe):
     dframe["Target"] = dframe.apply(lambda x: 1 if x['quality_1'] - x['quality_2'] > 0 else 0, axis=1)
+    dframe = frame.drop(columns=['quality_1']) if 'quality_1' in frame.columns else frame
+    dframe = frame.drop(columns=['quality_2']) if 'quality_2' in frame.columns else frame
     return dframe
 
 def get_dataset(frame):
