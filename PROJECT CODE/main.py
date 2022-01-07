@@ -66,14 +66,12 @@ def command_parse():
     return args
 
 
-def exploration():
-    pass
-
-
-
     
 
 def main(args):
+    print("Exploring dataset")
+
+
     print("Processing dataset")
     
     state = 42
@@ -85,13 +83,15 @@ def main(args):
     
 
     print("Performing grid search")
+
     r_val_acc, r_hyper = grid_search(args.model, rX_train, ry_train, cv=1, N=args.N)
+
     w_val_acc, w_hyper = grid_search(args.model, wX_train, wy_train, cv=1, N=args.N)
 
     print("Evaluate the model using best hyperparameters found")
-    print("Classification Report for red wine")
+    print("Classification Report for red wine with best hyperparameter:")
     evaluate_model(args.model, rX_train, ry_train, rX_test, ry_test, r_hyper)
-    print("Classification Report for white wine")
+    print("Classification Report for white wine with best hyperparameter:")
     evaluate_model(args.model, wX_train, wy_train, wX_test, wy_test, w_hyper)
     #SVM
     
