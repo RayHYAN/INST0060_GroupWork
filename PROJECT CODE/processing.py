@@ -20,19 +20,29 @@ from fomlads.evaluate.eval_regression import train_and_test_filter
 # In[5]:
 
 
-def processing(ifname):
-    df = pd.read_csv(r"./winequalityN.csv")
+def processing(file, sample_size, group, test_frac=0.2, state=42):
+    df = pd.read_csv(file)
 
     #Drop any empty values
     df.dropna(inplace = True)
 
     #We want to partition the data by wine type 
     df_grouped = df.groupby(df.type)
+
     #Creating a seperate dataframe for red and white wine
-    RED_DF = df_grouped.get_group("red")
-    WHITE_DF = df_grouped.get_group("white")
-    
-    return RED_DF, WHITE_DF
+    DF = df_grouped.get_group(group)
+    print("Deriving the representation...")    
+    concat = derived_rep(DF, sample_size, state)
+    print("feature mapping...")
+    new_feature_mapping(concat)
+    X, y = get_dataset(concat)
+    print("standardizing...")
+    X = scalar_funct(X)
+
+    print("splitting the dataset...")
+    X_train, y_train, X_test, y_test = train_test_split(X, y, test_frac, state=42)
+
+    return X_train, y_train, X_test, y_test
 
 
 # In[6]:
@@ -52,7 +62,7 @@ def derived_rep(dframe,size,state):
     df2 = pd.DataFrame()
     
     for entry1 in range(len(df_sample)):
-        for entry2 in range(entry1):
+        for entry2 in range(len(df_sample)):
             df1 = df1.append(df_sample.iloc[entry1].to_dict(),ignore_index=True)
             df2 = df2.append(df_sample.iloc[entry2].to_dict(),ignore_index=True)
             
@@ -96,35 +106,48 @@ def feature_mapping(dframe):
     fm_dframe = fm_dframe.drop(columns=['quality_diff'])
     
     return fm_dframe
-    
 
+def new_feature_mapping(dframe):
+    dframe["Target"] = dframe.apply(lambda x: 1 if x['quality_1'] - x['quality_2'] > 0 else 0, axis=1)
+    return dframe
+
+def get_dataset(frame):
+    dffeature = frame.drop(columns=['quality_diff']) if 'quality_diff' in frame.columns else frame #Dropping the quality difference column
+    
+    np.random.seed(42) #Setting a consistent seed 
+    featurematrix = dffeature.to_numpy() #Converting the dataframe into a numpy array 
+    
+    columns = len(list(dffeature.columns))
+    
+    X = featurematrix[:,:(columns-1)] #We split the matrix into inputs 
+    y = featurematrix[:,columns-1] #Take the last column of the matrix as targets 
+    return X, y
 
 # In[8]:
 
 
-def accuracy_score(pred_targets,real_targets):
-    number_of_targets = len(real_targets)
-    score = 0
-    
-    for i in range(number_of_targets):
-        if real_targets[i]==pred_targets[i]:
-            score += 1
-    accuracy = score/number_of_targets
+def accuracy_score(predicted_classes,true_classes):
+    accuracy = np.sum(np.equal(true_classes, predicted_classes)) / len(true_classes)
     return accuracy
 
 
 # In[9]:
 
 
+def train_test_split(X, y, test_frac, state=42):
+    np.random.seed(state)
+    train_filter,test_filter=train_and_test_filter(len(X),test_frac) #Applying the training and test split for the inputs and targets using our test fraction
+    
+    X_train, y_train, X_test, y_test = train_and_test_partition(X,y,train_filter,test_filter) 
+    
+    return X_train, y_train, X_test, y_test #Returning our training and testing inputs and targets
 
-def dframe_train_test_input_target(dffeature,test_frac):
+
+def dframe_train_test_input_target(dffeature,test_frac,state=42):
     """
     This function takes in the new data frame with the feature mapping already applied and converts
     this into training and testing inputs with a split given by the test_fraction. The function should
     output the training inputs and targets as well as the testing inputs and targets. 
-    
-    
-    
     """
 
     
@@ -161,6 +184,7 @@ def scalar_funct(inputs):
 
 
 # In[ ]:
+    
 
 
 

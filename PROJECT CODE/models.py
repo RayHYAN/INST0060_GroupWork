@@ -11,13 +11,95 @@ import scipy as sc
 
 from fomlads.model.classification import logistic_regression_fit
 from fomlads.model.classification import logistic_regression_predict
-from processing import accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+
+
+
+from processing import accuracy_score, train_test_split
 from evaluation import classificationreport
 from evaluation import confusion_matrix
 from time import process_time
 
 
 # In[3]:
+
+class LogisticsRegression():
+    def __init__(self, lamda):
+        self.lamda = lamda
+
+    def fit(self, X_train, y_train):
+        self.weights = logistic_regression_fit(X_train, y_train, lamda=self.lamda)
+    
+    def predict(self, X_test):
+        y_predict = logistic_regression_predict(X_test, self.weights)
+        return y_predict
+
+RandomForest = RandomForestClassifier
+SVM = lambda C, gamma: SVC(C=C, gamma=gamma, kernel='rbf')
+
+def cross_validation(model, X, y, cv=5):
+    if cv == 1:
+        X_train, y_train, X_test, y_test = train_test_split(X, y, test_frac=0.2, state=42)
+        model.fit(X_train, y_train)
+        y_predict = model.predict(X_test)
+        val_acc = accuracy_score(y_test, y_predict)
+        return [val_acc]
+
+    Xfolds = np.array_split(X, cv)
+    yfolds = np.array_split(y, cv)
+    cross_vals = []
+    for fold in range(cv):
+        y_test = yfolds[fold]
+        X_test = Xfolds[fold]
+        
+        X_train_temp = Xfolds[:fold]
+        X_train_temp.extend(Xfolds[fold+1:])
+        X_train = np.vstack(X_train_temp)
+        y_train_temp = yfolds[:fold]
+        y_train_temp.extend(yfolds[fold+1:])
+        y_train = np.hstack(y_train_temp)
+        model.fit(X_train, y_train)
+        y_predict = model.predict(X_test)
+        val_acc = accuracy_score(y_test, y_predict)
+        cross_vals.append(val_acc)
+    return cross_vals
+
+def grid_search(name, X, y, cv=5, N=5):
+    
+    svm_hyper = {'C': np.logspace(-4, 1, N), 'gamma': np.logspace(-1, 2, N)}
+    rf_hyper = {'n_estimators': [10, 100, 1000], 'max_depth': np.arange(1, 11)}
+    logist_hyper = {'C' : np.logspace(-2, 2, N), 'penalty': ['none', 'l1', 'l2', 'elasticnet']}
+    m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistics': (LogisticsRegression, logist_hyper)}
+    Model, params = m2m[name]
+
+    akey, bkey = params.keys()
+    alphas = params[akey]
+    betas = params[bkey]        
+    scores = [] # scores with hyperparameter
+    
+    for alpha in alphas:
+        for beta in betas:
+            hyper = dict()
+            hyper[akey] = alpha
+            hyper[bkey] = beta
+            model = Model(**hyper)
+            avg_score = np.mean(cross_validation(model, X, y, cv=cv))
+            print(avg_score,hyper)
+            scores.append((avg_score, hyper))
+    
+    return max(scores, key=lambda ele : ele[0])
+
+def evaluate_model(name, X_train, y_train, X_test, y_test, hyper):
+    m2m = {'SVM': (SVM), 'RF': (RandomForest), 'Logistics': (LogisticsRegression)}
+    Model = m2m[name]
+    model = Model(**hyper)
+    model.fit(X_train, y_train)
+    y_predict = model.predict(X_test)
+
+    # Performance report
+    classificationreport(y_test, y_predict)
+
 
 
 # Function for cross validation on logistic regression
@@ -43,7 +125,7 @@ def cross_validation_LR(X, y, cv,lamda=0):
         y_train = np.hstack(y_train_temp)
         weights = logistic_regression_fit(X_train, y_train,lamda=lamda)
         y_predict = logistic_regression_predict(X_test,weights)
-        val_acc = accuracy_score(y_test, y_predict)
+        val_acc = accuracy_score(y_test,y_predict)
         cross_vals.append(val_acc)
     return cross_vals
 
@@ -74,7 +156,7 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     
     """
     accuracy_list = []
-    print("Testing lambda parameter on validation data consisting of 5 folds")
+    print(f"Testing lambda parameter on validation data for {wine_type} consisting of 5 folds")
     for lam in lambda_list:
 
         val_acc,var_cv=evaluate_cv_LR(training_validation_inputs,training_validation_targets,lamda=lam)
@@ -94,8 +176,8 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     plt.legend()
     plt.savefig('Lambda_fitting_on_cross_validation_logistic_regression.png', bbox_inches='tight')
     
-    print(f'Best parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
-    print(f'Best average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
+    print(f'\nBest parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
+    print(f'\nBest average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
     print('\nNow running logistic regression on test data with best parameters ...')
     
     LR_test_funct(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type=wine_type,lamda = lam_max)
@@ -111,7 +193,6 @@ def LR_test_funct(train_val_inputs,train_val_targets,test_inputs,test_targets, w
 
     weight = logistic_regression_fit(train_val_inputs,train_val_targets,lamda = lamda)
     predicted_wine_targets = logistic_regression_predict(test_inputs,weight)
-    accuracy = accuracy_score(predicted_wine_targets,test_targets)
     
     t1_stop = process_time()
     
