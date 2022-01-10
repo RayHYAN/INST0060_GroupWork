@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sc
+import seaborn as sns
 
 
 # In[2]:
@@ -24,7 +25,7 @@ from processing import processing
 
 
 from models import LogisticRegression
-from models import RandomForest, SVM
+from models import RandomForest, SVM, KNN
 from models import grid_search, evaluate_model
 
 
@@ -74,7 +75,8 @@ def exploration():
     
 
 def main(args):
-    print("Processing dataset")
+
+    print("Exploring and Processing dataset")
     
     state = 42
     print("[Red wine group]")
@@ -83,14 +85,16 @@ def main(args):
     print("[White wine group]")
     wX_train, wy_train, wX_test, wy_test = processing(args.dataset, args.sample_size, group = "white", test_frac=args.test_frac, state=state)
     
-
     print("Performing grid search")
     r_val_acc, r_hyper = grid_search(args.model, rX_train, ry_train, cv=1, N=args.N)
+    print("The best hyper parameters found for red wine: {}".format(r_hyper))
     w_val_acc, w_hyper = grid_search(args.model, wX_train, wy_train, cv=1, N=args.N)
+    print("The best hyper parameters found for white wine: {}".format(w_hyper))
+
 
     print("Evaluate the model using best hyperparameters found")
-    evaluate_model(args.model, rX_train, ry_train, rX_test, ry_test, r_hyper)
-    evaluate_model(args.model, wX_train, wy_train, wX_test, wy_test, w_hyper)
+    evaluate_model(args.model, rX_train, ry_train, rX_test, ry_test, r_hyper,"red")
+    evaluate_model(args.model, wX_train, wy_train, wX_test, wy_test, w_hyper,"white")
     #SVM
     
     #Random Forest
