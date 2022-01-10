@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sc
+import seaborn as sns
 
 
 # In[4]:
@@ -18,7 +19,6 @@ from fomlads.evaluate.eval_regression import train_and_test_filter
 
 
 # In[5]:
-
 
 def processing(file, sample_size, group, test_frac=0.2, state=42, standardized=True):
     df = pd.read_csv(file)
@@ -36,8 +36,30 @@ def processing(file, sample_size, group, test_frac=0.2, state=42, standardized=T
     print("feature mapping...")
     #concat = new_feature_mapping(concat)
     concat = feature_mapping(concat)
+    
+    # Correlation matrix based on the wine type 
+    corr = concat.corr()
+    plt.subplots(figsize=(15,10))
+    ax = plt.axes()
+    sns.heatmap(corr, xticklabels=corr.columns, yticklabels=corr.columns, annot=True, cmap=sns.diverging_palette(220, 30, as_cmap=True),ax = ax)
+    ax.set_title('Correlation Matrix for ' + group + " wine")
+    plt.savefig('Correlation Matrix for ' + group + " wine")
+
+    # Disbution 
+    fig, ax = plt.subplots(ncols=4, nrows=3, figsize=(25,15))
+    index = 0
+    # White wine 
+    ax = ax.flatten()
+    for col, value in concat.items():
+        sns.histplot(value, ax=ax[index], color="#7ccae0")
+        index += 1
+    plt.tight_layout(pad=0.5, w_pad=0.7, h_pad=5.0)
+    plt.savefig("Distribution for " + group + " wine")
+    plt.clf()
+
     #print(concat.columns)
     X, y = get_dataset(concat)
+
     print("standardizing...")
     if standardized:
         X = scalar_funct(X)
@@ -46,8 +68,6 @@ def processing(file, sample_size, group, test_frac=0.2, state=42, standardized=T
     X_train, y_train, X_test, y_test = train_test_split(X, y, test_frac, state=42)
 
     return X_train, y_train, X_test, y_test
-
-
 # In[6]:
 
 
