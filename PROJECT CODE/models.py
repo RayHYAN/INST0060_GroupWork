@@ -24,7 +24,7 @@ from time import process_time
 
 # In[3]:
 
-class LogisticRegression1():
+class LogisticRegression():
     def __init__(self, lamda, add_bias_term):
         self.lamda = lamda
         self.add_bias_term = add_bias_term
@@ -36,58 +36,7 @@ class LogisticRegression1():
         y_predict = logistic_regression_predict(X_test, self.weights)
         return y_predict
 
-class LogisticRegression:
-    def __init__(self, lr, regularization, C=0.1):
-        self.lr = lr
-        self.regularization = regularization
-        self.C = C
 
-    def sigmoid(self, z): return 1 / (1 + np.exp(-z))
-    
-    def cost_function(self, X, y, weights):                 
-        z = np.dot(X, weights)
-        predict_1 = y * np.log(self.sigmoid(z))
-        predict_0 = (1 - y) * np.log(1 - self.sigmoid(z))
-        return -sum(predict_1 + predict_0) / len(X)
-    
-    def fit(self, X, y): 
-        lr = self.lr
-        termination_threshold=1e-8
-        max_epoch = 1000
-
-        weights = np.random.rand(X.shape[1] + 1)
-        X = np.concatenate((np.ones((X.shape[0], 1)), X), axis=1)
-        N = len(X)
-        update_magnitude = 2*termination_threshold
-        epoch = 0 
-        loss = []     
-        while update_magnitude > termination_threshold and epoch < max_epoch:     
-            # Gradient Descent
-            y_hat = self.sigmoid(np.dot(X, weights))
-            errors = y - y_hat
-            if self.regularization == 'l1':
-                delta_grad = lr * ( (X.T @ errors) + self.C *np.linalg.norm(weights, 1))
-            elif self.regularization == 'l2':
-                delta_grad = lr * ( (X.T @ errors) + self.C *np.linalg.norm(weights, 2))
-            else:
-                delta_grad = lr * (X.T @ errors)
-
-            new_weights = weights - delta_grad / N  
-            # calculate the update_magnitude
-            update_magnitude = np.sqrt(np.sum((new_weights-weights)**2))
-            # update the weights
-            weights = new_weights
-            epoch += 1
-            loss.append(errors)
-
-
-        self.weights = weights
-    
-    def predict(self, X):        
-        # Predicting with sigmoid function
-        z = (X @ self.weights[1:]) + self.weights[0]
-        # Returning binary result
-        return [1 if i > 0.5 else 0 for i in self.sigmoid(z)]
 
 RandomForest = RandomForestClassifier
 SVM = lambda C, gamma: SVC(C=C, gamma=gamma, kernel='rbf')
@@ -127,7 +76,7 @@ def grid_search(name, X, y, cv=5, N=5):
     logist_hyper = {'lamda' : np.logspace(-4, -1, N), 'add_bias_term': [True]}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
-    m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression1, logist_hyper)}
+    m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
     Model, params = m2m[name]
 
     akey, bkey = params.keys()
@@ -142,14 +91,13 @@ def grid_search(name, X, y, cv=5, N=5):
             hyper[bkey] = beta
             model = Model(**hyper)
             avg_score = np.mean(cross_validation(model, X, y, cv=cv))
-            print(avg_score,hyper)
+            #print(avg_score,hyper)
             scores.append((avg_score, hyper))
     
     return max(scores, key=lambda ele : ele[0])
 
 def evaluate_model(name, X_train, y_train, X_test, y_test, hyper):
-    #m2m = {'SVM': (SVM), 'RF': (RandomForest), 'Logistic': (LogisticRegression)}
-    m2m = {'SVM': (SVM), 'RF': (RandomForest), 'Logistic': (LogisticRegression1)}
+    m2m = {'SVM': (SVM), 'RF': (RandomForest), 'Logistic': (LogisticRegression)}
     Model = m2m[name]
     model = Model(**hyper)
     model.fit(X_train, y_train)
