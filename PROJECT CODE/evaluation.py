@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sc
+import seaborn as sns
 
 
 # In[2]:
@@ -28,6 +29,14 @@ def confusion_matrix(true_classes,predicted_classes):
 
     return confusionmatrix.values 
 
+# Plot Confusion Matrix Function 
+def plot_cm(true_classes,predicted_classes,group):
+    cm_matrix_svc_w = pd.DataFrame(data=confusion_matrix(true_classes,predicted_classes), columns=['Actual Positive:1', 'Actual Negative:0'], 
+                                 index=['Predict Positive:1', 'Predict Negative:0'])
+    
+    sns.heatmap(cm_matrix_svc_w, annot=True, fmt='d',cmap = "Blues")
+    
+    plt.savefig("Confusion Matrix for " + group + " wine")
 
 # In[3]:
 
