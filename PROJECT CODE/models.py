@@ -13,12 +13,13 @@ from fomlads.model.classification import logistic_regression_fit
 from fomlads.model.classification import logistic_regression_predict
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-
+from sklearn.neighbors import KNeighborsClassifier
 
 
 from processing import accuracy_score, train_test_split
 from evaluation import classificationreport
 from evaluation import confusion_matrix
+from evaluation import plot_cm
 from time import process_time
 
 
@@ -40,6 +41,7 @@ class LogisticRegression():
 
 RandomForest = RandomForestClassifier
 SVM = lambda C, gamma: SVC(C=C, gamma=gamma, kernel='rbf')
+KNN = KNeighborsClassifier
 
 def cross_validation(model, X, y, cv=5):
     if cv == 1:
@@ -74,9 +76,10 @@ def grid_search(name, X, y, cv=5, N=5):
     rf_hyper = {'n_estimators': [10, 100, 1000], 'max_depth': np.arange(1, 11)}
     #logist_hyper = {'lr' : [0.001, 0.01, 0.1], 'regularization': ['none',]}
     logist_hyper = {'lamda' : np.logspace(-4, -1, N), 'add_bias_term': [True]}
+    knn_hyper = {'n_neighbors' : [10, 1000, 100], 'weights': ['uniform', 'distance']}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
-    m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
+    m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper),  'KNN': (KNeighborsClassifier, knn_hyper),'Logistic': (LogisticRegression, logist_hyper)}
     Model, params = m2m[name]
 
     akey, bkey = params.keys()
@@ -96,14 +99,15 @@ def grid_search(name, X, y, cv=5, N=5):
     
     return max(scores, key=lambda ele : ele[0])
 
-def evaluate_model(name, X_train, y_train, X_test, y_test, hyper):
-    m2m = {'SVM': (SVM), 'RF': (RandomForest), 'Logistic': (LogisticRegression)}
+def evaluate_model(name, X_train, y_train, X_test, y_test, hyper,group):
+    m2m = {'SVM': (SVM), 'RF': (RandomForest), 'KNN': (KNeighborsClassifier), 'Logistic': (LogisticRegression)}
     Model = m2m[name]
     model = Model(**hyper)
     model.fit(X_train, y_train)
     y_predict = model.predict(X_test)
 
     # Performance report
+    plot_cm(y_test, y_predict,group)
     classificationreport(y_test, y_predict)
 
 
@@ -186,7 +190,7 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     print(f'\nBest average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
     print('\nNow running logistic regression on test data with best parameters ...')
     
-    LR_test_funct(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type=wine_type,lamda = lam_max)
+    # LR_test_funct(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type=wine_type,lamda = lam_max)
     
 
 
