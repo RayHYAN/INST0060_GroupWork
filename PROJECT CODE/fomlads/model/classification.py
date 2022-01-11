@@ -203,10 +203,10 @@ def logistic_regression_fit(
         R = np.diag(predicts*(1-predicts))
         # reshape predicts to be same form as targets
         predicts = predicts.reshape((N,1))
-        # Calculate the Hessian inverse
-        H_inv = np.linalg.inv(inputs.T @ R @ inputs + (lamda/2)*np.sum(np.abs(weights)) )
+        # Calculate the Hessian inverse with new L2 regularisation term
+        H_inv = np.linalg.inv(inputs.T @ R @ inputs + lamda*(np.diag(np.abs(weights))**-1))
         # update the weights
-        # I have added a new regularisation term within the new weights, using L1 regularisation
+        # I have added a new regularisation term within the new weights, using L2 regularisation
         new_weights = weights - (H_inv @ inputs.T @ (predicts-targets) )
         # calculate the update_magnitude
         update_magnitude = np.sqrt(np.sum((new_weights-weights)**2))
