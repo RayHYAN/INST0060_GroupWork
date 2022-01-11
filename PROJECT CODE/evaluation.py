@@ -30,13 +30,16 @@ def confusion_matrix(true_classes,predicted_classes):
     return confusionmatrix.values 
 
 # Plot Confusion Matrix Function 
-def plot_cm(true_classes,predicted_classes,group):
+def plot_cm(true_classes,predicted_classes,name,group):
     cm_matrix_svc_w = pd.DataFrame(data=confusion_matrix(true_classes,predicted_classes), columns=['Actual Positive:1', 'Actual Negative:0'], 
                                  index=['Predict Positive:1', 'Predict Negative:0'])
     
-    sns.heatmap(cm_matrix_svc_w, annot=True, fmt='d',cmap = "Blues")
+    #pyplot.figure(figszie=(15,10))
+    fig, ax = plt.subplots(figsize=(7.5,5))
+
+    sns.heatmap(cm_matrix_svc_w, annot=True, fmt='d',cmap = "Blues",ax=ax)
     
-    plt.savefig("Confusion Matrix for " + group + " wine")
+    plt.savefig("Confusion Matrix for " + name + " for " + group + " wine.png")
 
 # In[3]:
 
