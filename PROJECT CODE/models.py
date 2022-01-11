@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sc
+import seaborn as sns
 
 from fomlads.model.classification import logistic_regression_fit
 from fomlads.model.classification import logistic_regression_predict
@@ -70,13 +71,13 @@ def cross_validation(model, X, y, cv=5):
         cross_vals.append(val_acc)
     return cross_vals
 
-def grid_search(name, X, y, cv=5, N=5):
+def grid_search(name,group, X, y, cv=5, N=5):
     
     svm_hyper = {'C': np.logspace(-4, 1, N), 'gamma': np.logspace(-1, 2, N)}
     rf_hyper = {'n_estimators': [10, 100, 1000], 'max_depth': np.arange(1, 11)}
     #logist_hyper = {'lr' : [0.001, 0.01, 0.1], 'regularization': ['none',]}
     logist_hyper = {'lamda' : np.logspace(-4, -1, N), 'add_bias_term': [True]}
-    knn_hyper = {'n_neighbors' : [10, 1000, 100], 'weights': ['uniform', 'distance']}
+    knn_hyper = {'n_neighbors' : np.arange(1, 11), 'weights': ['uniform', 'distance']}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
     m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper),  'KNN': (KNeighborsClassifier, knn_hyper),'Logistic': (LogisticRegression, logist_hyper)}
@@ -86,9 +87,11 @@ def grid_search(name, X, y, cv=5, N=5):
     alphas = params[akey]
     betas = params[bkey]        
     scores = [] # scores with hyperparameter
-    
-    for alpha in alphas:
-        for beta in betas:
+    twoDscores = np.zeros((len(alphas), len(betas)))
+    for i in range(len(alphas)):
+        for j in range(len(betas)):
+            alpha = alphas[i]
+            beta = betas[j]
             hyper = dict()
             hyper[akey] = alpha
             hyper[bkey] = beta
@@ -96,10 +99,15 @@ def grid_search(name, X, y, cv=5, N=5):
             avg_score = np.mean(cross_validation(model, X, y, cv=cv))
             #print(avg_score,hyper)
             scores.append((avg_score, hyper))
+            twoDscores[i,j] = avg_score
     
-    return max(scores, key=lambda ele : ele[0])
+    plt.clf()
+    sns.heatmap(twoDscores, annot=True, xticklabels=betas, yticklabels=alphas)
+    plt.savefig('Hyperparameter tuning heatmap for ' + group + ' wine.png' )
 
-def evaluate_model(name, X_train, y_train, X_test, y_test, hyper,group):
+    return max(scores, key=lambda ele : ele[0])#, twoDscores
+
+def evaluate_model(name , group, X_train, y_train, X_test, y_test, hyper):
     m2m = {'SVM': (SVM), 'RF': (RandomForest), 'KNN': (KNeighborsClassifier), 'Logistic': (LogisticRegression)}
     Model = m2m[name]
     model = Model(**hyper)
@@ -107,6 +115,7 @@ def evaluate_model(name, X_train, y_train, X_test, y_test, hyper,group):
     y_predict = model.predict(X_test)
 
     # Performance report
+    plt.clf()
     plot_cm(y_test, y_predict,group)
     classificationreport(y_test, y_predict)
 

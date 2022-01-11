@@ -86,15 +86,15 @@ def main(args):
     wX_train, wy_train, wX_test, wy_test = processing(args.dataset, args.sample_size, group = "white", test_frac=args.test_frac, state=state)
     
     print("Performing grid search")
-    r_val_acc, r_hyper = grid_search(args.model, rX_train, ry_train, cv=1, N=args.N)
+    r_val_acc, r_hyper = grid_search(args.model, "red",rX_train, ry_train, cv=1, N=args.N)
     print("The best hyper parameters found for red wine: {}".format(r_hyper))
-    w_val_acc, w_hyper = grid_search(args.model, wX_train, wy_train, cv=1, N=args.N)
+    w_val_acc, w_hyper = grid_search(args.model,"white", wX_train, wy_train, cv=1, N=args.N)
     print("The best hyper parameters found for white wine: {}".format(w_hyper))
 
 
     print("Evaluate the model using best hyperparameters found")
-    evaluate_model(args.model, rX_train, ry_train, rX_test, ry_test, r_hyper,"red")
-    evaluate_model(args.model, wX_train, wy_train, wX_test, wy_test, w_hyper,"white")
+    evaluate_model(args.model,"red", rX_train, ry_train, rX_test, ry_test, r_hyper)
+    evaluate_model(args.model,"white", wX_train, wy_train, wX_test, wy_test, w_hyper)
     #SVM
     
     #Random Forest
