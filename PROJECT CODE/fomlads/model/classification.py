@@ -193,7 +193,6 @@ def logistic_regression_fit(
     # initially the update magnitude is set as larger than the
     # termination_threshold to ensure the first iteration runs
     update_magnitude = 2*termination_threshold
-    count = 0
     while update_magnitude > termination_threshold:
         # calculate the current prediction vector for weights
         # we don't want to extend the inputs a second time so add_bias_term
@@ -205,14 +204,15 @@ def logistic_regression_fit(
         # reshape predicts to be same form as targets
         predicts = predicts.reshape((N,1))
         # Calculate the Hessian inverse
-        H_inv = np.linalg.inv(inputs.T @ R @ inputs)
+        H_inv = np.linalg.inv(inputs.T @ R @ inputs + (lamda/2)*np.sum(np.abs(weights)) )
         # update the weights
         # I have added a new regularisation term within the new weights, using L1 regularisation
-        new_weights = weights - H_inv @ inputs.T @ (predicts-targets) + (lamda/2)*np.sum(np.abs(weights))
+        new_weights = weights - (H_inv @ inputs.T @ (predicts-targets) )
         # calculate the update_magnitude
         update_magnitude = np.sqrt(np.sum((new_weights-weights)**2))
         # update the weights
         weights = new_weights
+        
     return weights
 
 def logistic_regression_predict(
