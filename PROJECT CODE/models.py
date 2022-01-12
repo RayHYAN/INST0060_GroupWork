@@ -71,12 +71,12 @@ def cross_validation(model, X, y, cv=5):
         cross_vals.append(val_acc)
     return cross_vals
 
-def grid_search(name,group, X, y, cv=5, N=100):
+def grid_search(name,group, X, y, cv=3, N=10):
     
-    svm_hyper = {'C': np.logspace(-100, 1, N), 'gamma': np.logspace(-1, 2, N)}
+    svm_hyper = {'C': np.logspace(-1, 5, N), 'gamma': np.logspace(-2, 0, N)}
     rf_hyper = {'n_estimators': np.arange(10, 100), 'max_depth': np.arange(1, 11)}
     #logist_hyper = {'lr' : [0.001, 0.01, 0.1], 'regularization': ['none',]}
-    logist_hyper = {'lamda' : np.logspace(-100, -1, N), 'add_bias_term': [True]}
+    logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'add_bias_term': [True]}
     knn_hyper = {'n_neighbors' : np.arange(1, 100), 'weights': ['uniform', 'distance']}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
@@ -97,11 +97,12 @@ def grid_search(name,group, X, y, cv=5, N=100):
             hyper[bkey] = beta
             model = Model(**hyper)
             avg_score = np.mean(cross_validation(model, X, y, cv=cv))
-            #print(avg_score,hyper)
+            print(avg_score,hyper)
             scores.append((avg_score, hyper))
             twoDscores[i,j] = avg_score
     
     plt.clf()
+
     sns.heatmap(twoDscores, annot=True, xticklabels=betas, yticklabels=alphas)
     plt.savefig('Hyperparameter tuning heatmap for ' + name + ' for ' + group + ' wine.png' )
 
@@ -166,7 +167,7 @@ def evaluate_cv_LR(X, y,lamda=0, output=False):
 # In[5]:
 
 
-def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type,lambda_list):
+def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type):
     """
     This function finds the best parameter for lambda on logistic regression then runs the found parameters
     on the test data. It takes in a list of lambdas and tests the values provided within the range. 
@@ -174,10 +175,10 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     best parameters on the test data and outputs the precision, recall  f1 score , and accuracy as well as timing the process.
     
     """
+    lambda_list = np.logspace(-4,-1,10)
     accuracy_list = []
-    print(f"Testing lambda parameter on validation data for {wine_type} consisting of 5 folds")
+    #print(f"Testing lambda parameter on validation data for {wine_type} consisting of 5 folds")
     for lam in lambda_list:
-
         val_acc,var_cv=evaluate_cv_LR(training_validation_inputs,training_validation_targets,lamda=lam)
         accuracy_list.append(val_acc)
     
@@ -191,16 +192,16 @@ def LR_lambda_cv(training_validation_inputs,training_validation_targets,test_inp
     plt.xlabel('Lambda')
     plt.xscale("log")
     plt.ylabel('Accuracy')
-    plt.title("Average Logistic regression accuracies on values of lambda on validation data")
+    #plt.title("Average Logistic regression accuracies on values of lambda on validation data")
     plt.legend()
-    plt.savefig('Lambda_fitting_on_cross_validation_logistic_regression.png', bbox_inches='tight')
+    plt.savefig('Hyperparameter tuning heatmap for Logistic Regression for ' +  wine_type + '.png', bbox_inches='tight')
     
     print(f'\nBest parameter(lambda) for logistic regression for {wine_type} on validation data is ' + str(lam_max))
-    print(f'\nBest average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
-    print('\nNow running logistic regression on test data with best parameters ...')
+    # print(f'\nBest average accuracy score for logistic regression for {wine_type} on validation data is ' + str(score_max))
+    # print('\nNow running logistic regression on test data with best parameters ...')
     
     # LR_test_funct(training_validation_inputs,training_validation_targets,test_inputs,test_targets,wine_type=wine_type,lamda = lam_max)
-    
+    return lam_max
 
 
 # In[6]:
