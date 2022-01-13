@@ -98,7 +98,7 @@ def grid_search(name,group, X, y, cv=4, N=5):
             hyper[akey] = alpha
             hyper[bkey] = beta
             model = Model(**hyper)
-            avg_score = np.mean(cross_validation(model, X, y, cv=cv))
+            #avg_score = np.mean(cross_validation(model, X, y, cv=cv))
             print(avg_score,hyper)
             scores.append((avg_score, hyper))
             twoDscores[i,j] = avg_score
