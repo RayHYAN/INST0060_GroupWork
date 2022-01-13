@@ -90,18 +90,6 @@ def main(args):
     evaluate_model(args.model,"red", rX_train, ry_train, rX_test, ry_test, r_hyper)
     print("The classification report for white wine:")
     evaluate_model(args.model,"white", wX_train, wy_train, wX_test, wy_test, w_hyper)
-    #SVM
-    
-    #Random Forest
-    
-    #LOGISTIC REGRESSION 
-    # print("Running Logistic regression experiments")
-
-    
-    
-    # LR_lambda_cv(W_validation_inputs,W_validation_targets,W_test_inputs,W_test_targets,wine_type='white wine',lambda_list = np.logspace(-4,-1,10))
-    # LR_lambda_cv(R_validation_inputs,R_validation_targets,R_test_inputs,R_test_targets,wine_type='red wine',lambda_list = np.logspace(-4,-1,10))
-
 
 # In[7]:
 
