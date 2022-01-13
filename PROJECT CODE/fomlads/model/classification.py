@@ -155,7 +155,7 @@ def shared_covariance_model_predict(inputs, pi, mean0, mean1, covmtx):
 
 def logistic_regression_fit(
         inputs, targets, weights0=None, termination_threshold=1e-8,
-        add_bias_term=True,lamda=0):
+        add_bias_term=True,lamda=0,lr=0.01):
     """
     Fits a set of weights to the logistic regression model using the iteratively
     reweighted least squares (IRLS) method (Rubin, 1983)
@@ -193,7 +193,10 @@ def logistic_regression_fit(
     # initially the update magnitude is set as larger than the
     # termination_threshold to ensure the first iteration runs
     update_magnitude = 2*termination_threshold
-    while update_magnitude > termination_threshold:
+    max_epoch = 1000
+    count = 0
+
+    while update_magnitude > termination_threshold and count < max_epoch:
         # calculate the current prediction vector for weights
         # we don't want to extend the inputs a second time so add_bias_term
         # is set to False
@@ -204,14 +207,16 @@ def logistic_regression_fit(
         # reshape predicts to be same form as targets
         predicts = predicts.reshape((N,1))
         # Calculate the Hessian inverse with new L2 regularisation term
-        H_inv = np.linalg.inv(inputs.T @ R @ inputs + lamda*(np.diag(np.abs(weights))**-1))
+        # H_inv = np.linalg.inv(inputs.T @ R @ inputs + lamda*(np.diag(np.abs(weights))**-1))
         # update the weights
         # I have added a new regularisation term within the new weights, using L2 regularisation
-        new_weights = weights - (H_inv @ inputs.T @ (predicts-targets) )
+        new_weights = weights - lr * (lamda * inputs.T @ (predicts-targets) + weights)
+        #new_weights = weights - (H_inv @ inputs.T @(predicts - targets))
         # calculate the update_magnitude
         update_magnitude = np.sqrt(np.sum((new_weights-weights)**2))
         # update the weights
         weights = new_weights
+        count += 1
         
     return weights
 

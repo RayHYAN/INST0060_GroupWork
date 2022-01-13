@@ -27,12 +27,13 @@ from time import process_time
 # In[3]:
 
 class LogisticRegression():
-    def __init__(self, lamda, add_bias_term):
+    def __init__(self, lamda, lr):
         self.lamda = lamda
-        self.add_bias_term = add_bias_term
+        #self.add_bias_term = add_bias_term
+        self.lr = lr
 
     def fit(self, X_train, y_train):
-        self.weights = logistic_regression_fit(X_train, y_train, lamda=self.lamda)
+        self.weights = logistic_regression_fit(X_train, y_train, lamda=self.lamda,lr=self.lr)
     
     def predict(self, X_test):
         y_predict = logistic_regression_predict(X_test, self.weights)
@@ -71,12 +72,13 @@ def cross_validation(model, X, y, cv=5):
         cross_vals.append(val_acc)
     return cross_vals
 
-def grid_search(name,group, X, y, cv=3, N=10):
+def grid_search(name,group, X, y, cv=5, N=5):
     
-    svm_hyper = {'C': np.logspace(-1, 5, N), 'gamma': np.logspace(-2, 0, N)}
+    svm_hyper = {'C': np.logspace(-1, 1, N), 'gamma': np.logspace(-2, 1, N)}
     rf_hyper = {'n_estimators': np.arange(10, 100), 'max_depth': np.arange(1, 11)}
     #logist_hyper = {'lr' : [0.001, 0.01, 0.1], 'regularization': ['none',]}
-    logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'add_bias_term': [True]}
+    #logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'add_bias_term': [True]}
+    logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'lr': np.arange(1,10)*0.1}
     knn_hyper = {'n_neighbors' : np.arange(1, 100), 'weights': ['uniform', 'distance']}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
@@ -97,7 +99,7 @@ def grid_search(name,group, X, y, cv=3, N=10):
             hyper[bkey] = beta
             model = Model(**hyper)
             avg_score = np.mean(cross_validation(model, X, y, cv=cv))
-            print(avg_score,hyper)
+            #print(avg_score,hyper)
             scores.append((avg_score, hyper))
             twoDscores[i,j] = avg_score
     

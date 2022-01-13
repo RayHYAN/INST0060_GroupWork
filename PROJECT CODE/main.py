@@ -26,7 +26,7 @@ from processing import processing
 
 from models import LogisticRegression
 from models import RandomForest, SVM, KNN
-from models import grid_search, evaluate_model
+from models import grid_search, LR_lambda_cv, evaluate_model
 
 
 # In[6]:
@@ -58,7 +58,7 @@ def command_parse():
 
     argparser.add_argument("--N",
                             help = "hyperparameter search size",
-                            default = 3,
+                            default = 5,
                             type = int)
     
 
@@ -67,12 +67,6 @@ def command_parse():
     return args
 
 
-def exploration():
-    pass
-
-
-
-    
 
 def main(args):
 
@@ -86,14 +80,15 @@ def main(args):
     wX_train, wy_train, wX_test, wy_test = processing(args.dataset, args.sample_size, group = "white", test_frac=args.test_frac, state=state)
     
     print("Performing grid search")
-    r_val_acc, r_hyper = grid_search(args.model, "red",rX_train, ry_train, cv=1, N=args.N)
+    r_val_acc, r_hyper = grid_search(args.model, "red",rX_train, ry_train, cv=args.cv, N=args.N)
     print("The best hyper parameters found for red wine: {}".format(r_hyper))
-    w_val_acc, w_hyper = grid_search(args.model,"white", wX_train, wy_train, cv=1, N=args.N)
+    w_val_acc, w_hyper = grid_search(args.model,"white", wX_train, wy_train, cv=args.cv, N=args.N)
     print("The best hyper parameters found for white wine: {}".format(w_hyper))
 
-
     print("Evaluate the model using best hyperparameters found")
+    print("The classification report for red wine:")
     evaluate_model(args.model,"red", rX_train, ry_train, rX_test, ry_test, r_hyper)
+    print("The classification report for white wine:")
     evaluate_model(args.model,"white", wX_train, wy_train, wX_test, wy_test, w_hyper)
     #SVM
     
