@@ -78,7 +78,7 @@ def grid_search(name,group, X, y, cv=5, N=5):
     rf_hyper = {'n_estimators': np.arange(10, 100), 'max_depth': np.arange(1, 11)}
     #logist_hyper = {'lr' : [0.001, 0.01, 0.1], 'regularization': ['none',]}
     #logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'add_bias_term': [True]}
-    logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'lr': np.arange(1,10)*0.1}
+    logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'lr': np.arange(1,5)*0.1}
     knn_hyper = {'n_neighbors' : np.arange(1, 100), 'weights': ['uniform', 'distance']}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
