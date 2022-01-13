@@ -72,14 +72,14 @@ def cross_validation(model, X, y, cv=5):
         cross_vals.append(val_acc)
     return cross_vals
 
-def grid_search(name,group, X, y, cv=5, N=5):
+def grid_search(name,group, X, y, cv=4, N=5):
     
     svm_hyper = {'C': np.logspace(-1, 1, N), 'gamma': np.logspace(-2, 1, N)}
-    rf_hyper = {'n_estimators': np.arange(10, 100), 'max_depth': np.arange(1, 11)}
+    rf_hyper = {'n_estimators': np.arange(10, 50), 'max_depth': np.arange(1, 11)}
     #logist_hyper = {'lr' : [0.001, 0.01, 0.1], 'regularization': ['none',]}
     #logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'add_bias_term': [True]}
-    logist_hyper = {'lamda' : np.logspace(-4, -1, 5), 'lr': np.arange(1,5)*0.1}
-    knn_hyper = {'n_neighbors' : np.arange(1, 100), 'weights': ['uniform', 'distance']}
+    logist_hyper = {'lamda' : np.logspace(-4, -3, 3), 'lr': np.arange(1,5)*0.1}
+    knn_hyper = {'n_neighbors' : np.arange(1, 50), 'weights': ['uniform', 'distance']}
 
     #m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper), 'Logistic': (LogisticRegression, logist_hyper)}
     m2m = {'SVM': (SVM, svm_hyper), 'RF': (RandomForest, rf_hyper),  'KNN': (KNeighborsClassifier, knn_hyper),'Logistic': (LogisticRegression, logist_hyper)}
@@ -99,7 +99,7 @@ def grid_search(name,group, X, y, cv=5, N=5):
             hyper[bkey] = beta
             model = Model(**hyper)
             avg_score = np.mean(cross_validation(model, X, y, cv=cv))
-            #print(avg_score,hyper)
+            print(avg_score,hyper)
             scores.append((avg_score, hyper))
             twoDscores[i,j] = avg_score
     

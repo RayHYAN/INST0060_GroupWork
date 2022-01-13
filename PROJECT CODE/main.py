@@ -53,7 +53,7 @@ def command_parse():
     
     argparser.add_argument("--cv",
                             help = "number of folds in cv",
-                            default = 5,
+                            default = 4,
                             type = int)
 
     argparser.add_argument("--N",
