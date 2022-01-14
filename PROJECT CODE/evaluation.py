@@ -17,7 +17,9 @@ import seaborn as sns
 # Confusion Matrix Function 
 
 def confusion_matrix(true_classes,predicted_classes):
-
+    """
+    This function creates a confusion matrix for a model based on its predicted and true classes
+    """
     classes = set(true_classes)
     confusionmatrix  = pd.DataFrame(
         np.zeros((2,2),dtype=int),
@@ -46,10 +48,18 @@ def plot_cm(true_classes,predicted_classes,name,group):
 
 # Function for classification Report 
 def classificationreport(true_classes,predicted_classes):
+    """
+    Function for classification report of a model. This takes in an input of the real and predicted classes and outputs the Precision,
+    the recall, the accuracy and the F1 score of the model. 
+    """
     cm = confusion_matrix(true_classes,predicted_classes)
+    
     recall = cm[0,0]/(cm[0,0]+cm[0,1])
+    
     precision = cm[0,0]/(cm[0,0]+cm[1,0])
+
     f1_score = 2*precision*recall / (precision+recall)
+    
     acc = np.sum(np.equal(true_classes, predicted_classes)) / len(true_classes)
    
     print('Precison is: {0:0.4f}'. format(precision))

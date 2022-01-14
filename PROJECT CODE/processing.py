@@ -34,7 +34,7 @@ def processing(file, sample_size, group, test_frac=0.2, state=42, standardized=T
     print("Deriving the representation...")    
     concat = derived_rep(DF, sample_size, state)
     print("feature mapping...")
-    #concat = new_feature_mapping(concat)
+
     concat = feature_mapping(concat)
     
     # Correlation matrix based on the wine type 
@@ -81,9 +81,11 @@ def derived_rep(dframe,size,state):
     df_sample = dframe.sample(n=size,random_state=state) #We want to extract a random n number of entries from the data frame
     df_sample = df_sample.drop(columns=['type']) #We want to remove the 'type' column since our data frame is already partitioned into white and red
     
-    df1 = pd.DataFrame()
+    df1 = pd.DataFrame()#Creating 2 new dataframes
     df2 = pd.DataFrame()
-    
+
+
+    #For each entry we want to pair it up with the other entries in our random selection but we do not want duplicates so we uses dictionaries
     for entry1 in range(len(df_sample)):
         for entry2 in range(len(df_sample)):
             df1 = df1.append(df_sample.iloc[entry1].to_dict(),ignore_index=True)
@@ -131,6 +133,9 @@ def feature_mapping(dframe):
     return fm_dframe
 
 def new_feature_mapping(frame):
+    """
+    Experimenting with different feature mappings, this function keeps most of the concatenated dataset and only calculates the target column needed
+    """
     frame["Target"] = frame.apply(lambda x: 1 if x['quality_1'] - x['quality_2'] > 0 else 0, axis=1)
     frame = frame.drop(columns=['quality_diff']) if 'quality_diff' in frame.columns else frame #Dropping the quality difference column
     frame = frame.drop(columns=['quality_1']) if 'quality_1' in frame.columns else frame
@@ -139,8 +144,10 @@ def new_feature_mapping(frame):
     return frame
 
 def get_dataset(frame):
+    """
+    This function takes in a dataset and converts it into a numpy array and splits it into inputs and targets
+    """
     
-
     featurematrix = frame.to_numpy() #Converting the dataframe into a numpy array 
     
     columns = len(list(frame.columns))
@@ -153,6 +160,10 @@ def get_dataset(frame):
 
 
 def accuracy_score(predicted_classes,true_classes):
+    #Creating an accuracy function
+
+    #We have the accuracy as the sum of the number of values that are the same in the true and predicted classes over the number of targets predicted.
+    
     accuracy = np.sum(np.equal(true_classes, predicted_classes)) / len(true_classes)
     return accuracy
 
