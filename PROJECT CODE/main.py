@@ -26,7 +26,7 @@ from processing import processing
 
 from models import LogisticRegression
 from models import RandomForest, SVM, KNN
-from models import grid_search, LR_lambda_cv, evaluate_model
+from models import grid_search, evaluate_model
 
 
 # In[6]:
